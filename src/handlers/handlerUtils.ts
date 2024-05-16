@@ -9,6 +9,7 @@ import {
   RESPONSE_HEADER_KEYS,
   RETRY_STATUS_CODES,
   GOOGLE_VERTEX_AI,
+  OPEN_AI,
 } from '../globals';
 import Providers from '../providers';
 import { ProviderAPIConfig, endpointStrings } from '../providers/types';
@@ -54,14 +55,19 @@ export function constructRequest(
     'content-type': 'application/json',
   };
 
-  let headers: Record<string, string> = {
-    ...providerConfigMappedHeaders,
-  };
+  let headers: Record<string, string> = {};
+
+  Object.keys(providerConfigMappedHeaders).forEach((h: string) => {
+    headers[h.toLowerCase()] = providerConfigMappedHeaders[h];
+  });
 
   const forwardHeadersMap: Record<string, string> = {};
 
   forwardHeaders.forEach((h: string) => {
-    if (requestHeaders[h]) forwardHeadersMap[h] = requestHeaders[h];
+    const lowerCaseHeaderKey = h.toLowerCase();
+    if (requestHeaders[lowerCaseHeaderKey])
+      forwardHeadersMap[lowerCaseHeaderKey] =
+        requestHeaders[lowerCaseHeaderKey];
   });
 
   // Add any headers that the model might need
@@ -503,10 +509,16 @@ export async function tryPost(
     onStatusCodes: providerOption.retry?.onStatusCodes ?? RETRY_STATUS_CODES,
   };
 
-  const [getFromCacheFunction, cacheIdentifier, requestOptions] = [
+  const [
+    getFromCacheFunction,
+    cacheIdentifier,
+    requestOptions,
+    preRequestValidator,
+  ] = [
     c.get('getFromCache'),
     c.get('cacheIdentifier'),
     c.get('requestOptions') ?? [],
+    c.get('preRequestValidator'),
   ];
 
   let cacheResponse, cacheKey, cacheMode, cacheMaxAge;
@@ -570,13 +582,19 @@ export async function tryPost(
     }
   }
 
-  [response, retryCount] = await retryRequest(
-    url,
-    fetchOptions,
-    providerOption.retry.attempts,
-    providerOption.retry.onStatusCodes,
-    providerOption.requestTimeout || null
-  );
+  response = preRequestValidator
+    ? preRequestValidator(providerOption, requestHeaders)
+    : undefined;
+
+  if (!response) {
+    [response, retryCount] = await retryRequest(
+      url,
+      fetchOptions,
+      providerOption.retry.attempts,
+      providerOption.retry.onStatusCodes,
+      providerOption.requestTimeout || null
+    );
+  }
 
   const mappedResponse = await responseHandler(
     response,
@@ -972,6 +990,11 @@ export function constructConfigFromRequestHeaders(
     workersAiAccountId: requestHeaders[`x-${POWERED_BY}-workers-ai-account-id`],
   };
 
+  const openAiConfig = {
+    openaiOrganization: requestHeaders[`x-${POWERED_BY}-openai-organization`],
+    openaiProject: requestHeaders[`x-${POWERED_BY}-openai-project`],
+  };
+
   const vertexConfig = {
     vertexProjectId: requestHeaders[`x-${POWERED_BY}-vertex-project-id`],
     vertexRegion: requestHeaders[`x-${POWERED_BY}-vertex-region`],
@@ -1007,6 +1030,13 @@ export function constructConfigFromRequestHeaders(
           ...workersAiConfig,
         };
       }
+
+      if (parsedConfigJson.provider === OPEN_AI) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...openAiConfig,
+        };
+      }
     }
     return convertKeysToCamelCase(parsedConfigJson, [
       'override_params',
@@ -1025,5 +1055,6 @@ export function constructConfigFromRequestHeaders(
       workersAiConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === GOOGLE_VERTEX_AI &&
       vertexConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === OPEN_AI && openAiConfig),
   };
 }
