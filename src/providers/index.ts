@@ -30,8 +30,9 @@ import NovitaAIConfig from './novita-ai';
 import MonsterAPIConfig from './monsterapi';
 import PredibaseConfig from './predibase';
 import AtomLLamaConfig from './atom-llama';
-import CozeConfig from './coze';
 import DeepSeekConfig from './deepseek';
+import CozeComConfig from './coze-com';
+import CozeCNConfig from './coze-cn';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -65,8 +66,9 @@ const Providers: { [key: string]: ProviderConfigs } = {
   monsterapi: MonsterAPIConfig,
   predibase: PredibaseConfig,
   'atom-llama': AtomLLamaConfig,
-  coze: CozeConfig,
   deepseek: DeepSeekConfig,
+  'coze.com': CozeComConfig,
+  'coze.cn': CozeCNConfig,
 };
 
 export default Providers;

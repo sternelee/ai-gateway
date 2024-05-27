@@ -54,8 +54,9 @@ export const NOVITA_AI: string = 'novita-ai';
 export const MONSTERAPI: string = 'monsterapi';
 export const PREDIBASE: string = 'predibase';
 export const ATOM_LLAMA: string = 'atom-llama';
-export const COZE: string = 'coze';
 export const DEEPSEEK: string = 'deepseek';
+export const COZE_COM: string = 'coze.com';
+export const COZE_CN: string = 'coze.cn';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -89,8 +90,9 @@ export const VALID_PROVIDERS = [
   MONSTERAPI,
   PREDIBASE,
   ATOM_LLAMA,
-  COZE,
   DEEPSEEK,
+  COZE_COM,
+  COZE_CN,
 ];
 
 export const CONTENT_TYPES = {

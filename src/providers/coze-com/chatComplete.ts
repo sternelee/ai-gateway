@@ -1,4 +1,4 @@
-import { COZE } from '../../globals';
+import { COZE_COM } from '../../globals';
 import { Params } from '../../types/requestBody';
 import {
   ChatCompletionResponse,
@@ -12,13 +12,8 @@ import {
 
 const transformGenerationConfig = (params: Params) => {
   const generationConfig: Record<string, any> = {
-    conversation_id: '',
     user: 'apiuser',
-    stream: params.stream ?? false,
   };
-  if (params['model']) {
-    generationConfig['bot_id'] = params['model'];
-  }
   if (params['messages']) {
     const chatHistory = [];
     for (let i = 0; i < params['messages'].length - 1; i++) {
@@ -41,36 +36,30 @@ const transformGenerationConfig = (params: Params) => {
 
 export const CozeChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
+    param: 'bot_id',
+    required: true,
   },
-  messages: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
-  temperature: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
-  top_p: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
-  top_k: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
-  max_tokens: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
-  stop: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
+  messages: [
+    {
+      param: 'user',
+      default: '',
+      transform: (params: Params) => transformGenerationConfig(params).user,
+    },
+    {
+      param: 'query',
+      default: '',
+      transform: (params: Params) => transformGenerationConfig(params).query,
+    },
+    {
+      param: 'chat_history',
+      default: '',
+      transform: (params: Params) =>
+        transformGenerationConfig(params).chat_history,
+    },
+  ],
   stream: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
+    param: 'stream',
+    default: false,
   },
 };
 
@@ -125,7 +114,7 @@ export const CozeChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      COZE
+      COZE_COM
     );
   }
 
@@ -135,7 +124,7 @@ export const CozeChatCompleteResponseTransform: (
       object: response.object,
       created: response.created,
       model: response.model,
-      provider: COZE,
+      provider: COZE_COM,
       choices: response.messages.map((c) => ({
         index: 0,
         message: {
@@ -152,7 +141,7 @@ export const CozeChatCompleteResponseTransform: (
     };
   }
 
-  return generateInvalidProviderResponseError(response, COZE);
+  return generateInvalidProviderResponseError(response, COZE_COM);
 };
 
 export const CozeChatCompleteStreamChunkTransform: (
@@ -172,7 +161,7 @@ export const CozeChatCompleteStreamChunkTransform: (
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: '',
-        provider: COZE,
+        provider: COZE_COM,
         choices: [
           {
             index: 0,
@@ -189,7 +178,7 @@ export const CozeChatCompleteStreamChunkTransform: (
       object: 'chat.completion.chunk',
       created: Math.floor(Date.now() / 1000),
       model: '',
-      provider: COZE,
+      provider: COZE_COM,
       choices: [
         {
           index: parsedChunk.index,
