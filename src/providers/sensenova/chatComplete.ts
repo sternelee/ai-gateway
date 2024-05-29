@@ -1,4 +1,5 @@
-import { OPENROUTER } from '../../globals';
+import { SENSENOVA } from '../../globals';
+import { Params } from '../../types/requestBody';
 import {
   ChatCompletionResponse,
   ErrorResponse,
@@ -9,20 +10,53 @@ import {
   generateInvalidProviderResponseError,
 } from '../utils';
 
-export const OpenrouterChatCompleteConfig: ProviderConfig = {
+const transformGenerationConfig = (params: Params) => {
+  const generationConfig: Record<string, any> = {
+    user: 'apiuser',
+  };
+  if (params['messages']) {
+    const chatHistory = [];
+    for (let i = 0; i < params['messages'].length - 1; i++) {
+      const message = params['messages'][i];
+      const role = message.role;
+      const content = message.content;
+      chatHistory.push({
+        role: role,
+        content: content,
+        content_type: 'text',
+      });
+    }
+    const lastMessage = params['messages'][params['messages'].length - 1];
+    const queryString = lastMessage.content;
+    generationConfig['chat_history'] = chatHistory;
+    generationConfig['query'] = queryString;
+  }
+  return generationConfig;
+};
+
+export const SensenovaChatCompleteConfig: ProviderConfig = {
   model: {
     param: 'model',
     required: true,
-    default: 'openrouter/auto',
+  },
+  n: {
+    param: 'n',
+    default: 1,
   },
   messages: {
     param: 'messages',
     default: [],
   },
+  repetition_penalty: {
+    param: 'repetition_penalty',
+  },
+  know_ids: {
+    param: 'know_ids',
+    default: [],
+  },
   max_tokens: {
-    param: 'max_tokens',
+    param: 'max_new_tokens',
     default: 1024,
-    min: 0,
   },
   temperature: {
     param: 'temperature',
@@ -36,13 +70,23 @@ export const OpenrouterChatCompleteConfig: ProviderConfig = {
     min: 0,
     max: 1,
   },
+  user: {
+    param: 'user',
+    default: 'apiuser'
+  },
   stream: {
     param: 'stream',
     default: false,
   },
+  knowledge_config: {
+    param: 'knowledge_config',
+  },
+  plugins: {
+    param: 'plugins',
+  },
 };
 
-interface OpenrouterChatCompleteResponse extends ChatCompletionResponse {
+interface SensenovaChatCompleteResponse extends ChatCompletionResponse {
   id: string;
   object: string;
   created: number;
@@ -54,7 +98,7 @@ interface OpenrouterChatCompleteResponse extends ChatCompletionResponse {
   };
 }
 
-export interface OpenrouterErrorResponse {
+export interface SensenovaErrorResponse {
   object: string;
   message: string;
   type: string;
@@ -62,7 +106,7 @@ export interface OpenrouterErrorResponse {
   code: string;
 }
 
-interface OpenrouterStreamChunk {
+interface SensenovaStreamChunk {
   id: string;
   object: string;
   created: number;
@@ -77,10 +121,11 @@ interface OpenrouterStreamChunk {
   }[];
 }
 
-export const OpenrouterChatCompleteResponseTransform: (
-  response: OpenrouterChatCompleteResponse | OpenrouterErrorResponse,
+export const SensenovaChatCompleteResponseTransform: (
+  response: SensenovaChatCompleteResponse | SensenovaErrorResponse,
   responseStatus: number
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
+  console.log(response)
   if ('message' in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
@@ -89,7 +134,7 @@ export const OpenrouterChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      OPENROUTER
+      SENSENOVA
     );
   }
 
@@ -99,7 +144,7 @@ export const OpenrouterChatCompleteResponseTransform: (
       object: response.object,
       created: response.created,
       model: response.model,
-      provider: OPENROUTER,
+      provider: SENSENOVA,
       choices: response.choices.map((c) => ({
         index: c.index,
         message: {
@@ -116,41 +161,27 @@ export const OpenrouterChatCompleteResponseTransform: (
     };
   }
 
-  return generateInvalidProviderResponseError(response, OPENROUTER);
+  return generateInvalidProviderResponseError(response, SENSENOVA);
 };
 
-export const OpenrouterChatCompleteStreamChunkTransform: (
+export const SensenovaChatCompleteStreamChunkTransform: (
   response: string
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
   chunk = chunk.replace(/^data: /, '');
   chunk = chunk.trim();
+  console.log(chunk)
   if (chunk === '[DONE]') {
     return `data: ${chunk}\n\n`;
   }
-  if (chunk.includes('OPENROUTER PROCESSING')) {
-    chunk = JSON.stringify({
-      id: `${Date.now()}`,
-      model: '',
-      object: 'chat.completion.chunk',
-      created: Date.now(),
-      choices: [
-        {
-          index: 0,
-          delta: { role: 'assistant', content: '' },
-          finish_reason: null,
-        },
-      ],
-    });
-  }
-  const parsedChunk: OpenrouterStreamChunk = JSON.parse(chunk);
+  const parsedChunk: SensenovaStreamChunk = JSON.parse(chunk);
   return (
     `data: ${JSON.stringify({
       id: parsedChunk.id,
       object: parsedChunk.object,
       created: parsedChunk.created,
       model: parsedChunk.model,
-      provider: OPENROUTER,
+      provider: SENSENOVA,
       choices: [
         {
           index: parsedChunk.choices[0].index,

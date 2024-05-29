@@ -33,6 +33,7 @@ import AtomLLamaConfig from './atom-llama';
 import DeepSeekConfig from './deepseek';
 import CozeComConfig from './coze-com';
 import CozeCNConfig from './coze-cn';
+import SensenovaConfig from './sensenova';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -53,7 +54,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   ai21: AI21Config,
   bedrock: BedrockConfig,
   groq: GroqConfig,
- segmind: SegmindConfig,
+  segmind: SegmindConfig,
   jina: JinaConfig,
   'fireworks-ai': FireworksAIConfig,
   'workers-ai': WorkersAiConfig,
@@ -69,6 +70,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   deepseek: DeepSeekConfig,
   'coze.com': CozeComConfig,
   'coze.cn': CozeCNConfig,
+  'sensenova': SensenovaConfig,
 };
 
 export default Providers;

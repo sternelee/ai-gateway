@@ -57,6 +57,7 @@ export const ATOM_LLAMA: string = 'atom-llama';
 export const DEEPSEEK: string = 'deepseek';
 export const COZE_COM: string = 'coze.com';
 export const COZE_CN: string = 'coze.cn';
+export const SENSENOVA: string = 'sensenova';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -93,6 +94,7 @@ export const VALID_PROVIDERS = [
   DEEPSEEK,
   COZE_COM,
   COZE_CN,
+  SENSENOVA,
 ];
 
 export const CONTENT_TYPES = {
