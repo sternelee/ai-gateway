@@ -39,13 +39,22 @@ export const transformAuth = async (c: Context<{ Bindings: Bindings }>, next: an
   if (kv) {
     const config: KVVirtualKey | null = await kv.get(authorization, { type: 'json' });
     if (config) {
-      const strategy = config.strategy?.mode || "single";
-      const mappings = config.mappings || {};
-      if (strategy === "single" && mappings[model]) {
-        const provider = mappings[model].provider
-        const apiKey = config.targets.find(x => x.provider === provider)?.api_key
+      const { strategy, targets, mappings = {}, ...rest } = config;
+      const mode = config.strategy?.mode || "single";
+      if (mode === "single" && mappings[model]) {
+        const mapping = mappings[model];
+        const provider = mapping.provider
+        const apiKey = targets.find(x => x.provider === provider)?.api_key
         c.header(`x-${POWERED_BY}-provider`, provider);
         c.header(`authorization`, apiKey || authorization);
+        c.header(`x-${POWERED_BY}-config`, JSON.stringify({
+          ...rest,
+          provider,
+          apiKey,
+          overrideParams: {
+            model: mapping.model,
+          }
+        }));
       } else {
         c.header(`x-${POWERED_BY}-config`, JSON.stringify(config));
       }
