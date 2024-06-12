@@ -7,6 +7,10 @@ node_compat = true
 ENVIRONMENT = 'dev'
 CUSTOM_HEADERS_TO_IGNORE = []
 
+[[kv_namespaces]]
+binding = "KV"
+id = "84e40b8ef2fe48509186f540ab47e22a"
+
 #
 #Configuration for DEVELOPMENT environment
 #
