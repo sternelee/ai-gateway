@@ -1,5 +1,4 @@
 import { SENSENOVA } from '../../globals';
-import { Params } from '../../types/requestBody';
 import {
   ChatCompletionResponse,
   ErrorResponse,
@@ -9,30 +8,6 @@ import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
 } from '../utils';
-
-const transformGenerationConfig = (params: Params) => {
-  const generationConfig: Record<string, any> = {
-    user: 'apiuser',
-  };
-  if (params['messages']) {
-    const chatHistory = [];
-    for (let i = 0; i < params['messages'].length - 1; i++) {
-      const message = params['messages'][i];
-      const role = message.role;
-      const content = message.content;
-      chatHistory.push({
-        role: role,
-        content: content,
-        content_type: 'text',
-      });
-    }
-    const lastMessage = params['messages'][params['messages'].length - 1];
-    const queryString = lastMessage.content;
-    generationConfig['chat_history'] = chatHistory;
-    generationConfig['query'] = queryString;
-  }
-  return generationConfig;
-};
 
 export const SensenovaChatCompleteConfig: ProviderConfig = {
   model: {
@@ -125,7 +100,6 @@ export const SensenovaChatCompleteResponseTransform: (
   response: SensenovaChatCompleteResponse | SensenovaErrorResponse,
   responseStatus: number
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  console.log(response)
   if ('message' in response && responseStatus !== 200) {
     return generateErrorResponse(
       {

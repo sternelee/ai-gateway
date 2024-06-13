@@ -34,7 +34,7 @@ const app = new Hono();
 
 app.use('*', (c, next) => {
   const runtime = getRuntimeKey();
-  if (runtime !== 'lagon' && runtime !== 'workerd') {
+  if (runtime !== 'workerd') {
     return compress()(c, next);
   }
   return next();
