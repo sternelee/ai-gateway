@@ -22,7 +22,6 @@ import { requestValidator } from './middlewares/requestValidator';
 import { compress } from 'hono/compress';
 import { getRuntimeKey } from 'hono/adapter';
 import { imageGenerationsHandler } from './handlers/imageGenerationsHandler';
-import { transformAuth } from './middlewares/transformAuth';
 
 // Create a new Hono server instance
 const app = new Hono();
@@ -95,31 +94,31 @@ app.post('/v1/embed', embedHandler);
  * POST route for '/v1/chat/completions'.
  * Handles requests by passing them to the chatCompletionsHandler.
  */
-app.post('/v1/chat/completions', transformAuth, requestValidator, chatCompletionsHandler);
+app.post('/v1/chat/completions', requestValidator, chatCompletionsHandler);
 
 /**
  * POST route for '/v1/completions'.
  * Handles requests by passing them to the completionsHandler.
  */
-app.post('/v1/completions', transformAuth, requestValidator, completionsHandler);
+app.post('/v1/completions', requestValidator, completionsHandler);
 
 /**
  * POST route for '/v1/embeddings'.
  * Handles requests by passing them to the embeddingsHandler.
  */
-app.post('/v1/embeddings', transformAuth, requestValidator, embeddingsHandler);
+app.post('/v1/embeddings', requestValidator, embeddingsHandler);
 
 /**
  * POST route for '/v1/images/generations'.
  * Handles requests by passing them to the imageGenerations handler.
  */
-app.post('/v1/images/generations', transformAuth, requestValidator, imageGenerationsHandler);
+app.post('/v1/images/generations', requestValidator, imageGenerationsHandler);
 
 /**
  * POST route for '/v1/prompts/:id/completions'.
  * Handles portkey prompt completions route
  */
-app.post('/v1/prompts/*', transformAuth, requestValidator, (c) => {
+app.post('/v1/prompts/*', requestValidator, (c) => {
   if (c.req.url.endsWith('/v1/chat/completions')) {
     return chatCompletionsHandler(c);
   } else if (c.req.url.endsWith('/v1/completions')) {
@@ -139,12 +138,12 @@ app.post('/v1/prompts/*', transformAuth, requestValidator, (c) => {
 app.post('/v1/proxy/*', proxyHandler);
 
 // Support the /v1 proxy endpoint after all defined endpoints so this does not interfere.
-app.post('/v1/*', transformAuth, requestValidator, proxyHandler);
+app.post('/v1/*', requestValidator, proxyHandler);
 
 // Support the /v1 proxy endpoint after all defined endpoints so this does not interfere.
-app.get('/v1/*', transformAuth, requestValidator, proxyGetHandler);
+app.get('/v1/*', requestValidator, proxyGetHandler);
 
-app.delete('/v1/*', transformAuth, requestValidator, proxyGetHandler);
+app.delete('/v1/*', requestValidator, proxyGetHandler);
 
 // Export the app
 export default app;
