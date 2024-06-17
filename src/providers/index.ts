@@ -31,8 +31,7 @@ import MonsterAPIConfig from './monsterapi';
 import PredibaseConfig from './predibase';
 import AtomLLamaConfig from './atom-llama';
 import DeepSeekConfig from './deepseek';
-import CozeComConfig from './coze-com';
-import CozeCNConfig from './coze-cn';
+import CozeConfig from './coze';
 import SensenovaConfig from './sensenova';
 
 const Providers: { [key: string]: ProviderConfigs } = {
@@ -68,8 +67,8 @@ const Providers: { [key: string]: ProviderConfigs } = {
   predibase: PredibaseConfig,
   'atom-llama': AtomLLamaConfig,
   deepseek: DeepSeekConfig,
-  'coze.com': CozeComConfig,
-  'coze.cn': CozeCNConfig,
+  'coze': CozeConfig,
+  'coze.cn': CozeConfig,
   'sensenova': SensenovaConfig,
 };
 

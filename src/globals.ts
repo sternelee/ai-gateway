@@ -55,7 +55,7 @@ export const MONSTERAPI: string = 'monsterapi';
 export const PREDIBASE: string = 'predibase';
 export const ATOM_LLAMA: string = 'atom-llama';
 export const DEEPSEEK: string = 'deepseek';
-export const COZE_COM: string = 'coze.com';
+export const COZE: string = 'coze';
 export const COZE_CN: string = 'coze.cn';
 export const SENSENOVA: string = 'sensenova';
 
@@ -92,7 +92,7 @@ export const VALID_PROVIDERS = [
   PREDIBASE,
   ATOM_LLAMA,
   DEEPSEEK,
-  COZE_COM,
+  COZE,
   COZE_CN,
   SENSENOVA,
 ];

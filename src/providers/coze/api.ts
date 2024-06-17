@@ -1,7 +1,7 @@
 import { ProviderAPIConfig } from '../types';
 
 const CozeAPIConfig: ProviderAPIConfig = {
-  getBaseURL: () => 'https://api.coze.cn',
+  getBaseURL: ({ providerOptions }) => `'https://api.coze.${providerOptions.provider === 'coze.cn' ? 'cn' : 'com'}'`,
   headers: ({ providerOptions }) => {
     return { Authorization: `Bearer ${providerOptions.apiKey}` };
   },

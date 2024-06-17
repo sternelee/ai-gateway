@@ -1,4 +1,4 @@
-import { COZE_COM } from '../../globals';
+import { COZE } from '../../globals';
 import { Params } from '../../types/requestBody';
 import {
   ChatCompletionResponse,
@@ -114,7 +114,7 @@ export const CozeChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      COZE_COM
+      COZE
     );
   }
 
@@ -124,7 +124,7 @@ export const CozeChatCompleteResponseTransform: (
       object: response.object,
       created: response.created,
       model: response.model,
-      provider: COZE_COM,
+      provider: COZE,
       choices: response.messages.map((c) => ({
         index: 0,
         message: {
@@ -141,7 +141,7 @@ export const CozeChatCompleteResponseTransform: (
     };
   }
 
-  return generateInvalidProviderResponseError(response, COZE_COM);
+  return generateInvalidProviderResponseError(response, COZE);
 };
 
 export const CozeChatCompleteStreamChunkTransform: (
@@ -161,7 +161,7 @@ export const CozeChatCompleteStreamChunkTransform: (
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: '',
-        provider: COZE_COM,
+        provider: COZE,
         choices: [
           {
             index: 0,
@@ -178,7 +178,7 @@ export const CozeChatCompleteStreamChunkTransform: (
       object: 'chat.completion.chunk',
       created: Math.floor(Date.now() / 1000),
       model: '',
-      provider: COZE_COM,
+      provider: COZE,
       choices: [
         {
           index: parsedChunk.index,
