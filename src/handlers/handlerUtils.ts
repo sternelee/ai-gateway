@@ -474,8 +474,14 @@ export async function tryPost(
   const customHost =
     requestHeaders[HEADER_KEYS.CUSTOM_HOST] || providerOption.customHost || '';
 
+  const requestTimeout =
+    Number(requestHeaders[HEADER_KEYS.REQUEST_TIMEOUT]) ||
+    providerOption.requestTimeout ||
+    null;
+
   const baseUrl =
     customHost || apiConfig.getBaseURL({ providerOptions: providerOption });
+
   const endpoint = apiConfig.getEndpoint({
     providerOptions: providerOption,
     fn,
@@ -592,7 +598,7 @@ export async function tryPost(
       fetchOptions,
       providerOption.retry.attempts,
       providerOption.retry.onStatusCodes,
-      providerOption.requestTimeout || null
+      requestTimeout
     );
   }
 
@@ -995,10 +1001,22 @@ export function constructConfigFromRequestHeaders(
     openaiProject: requestHeaders[`x-${POWERED_BY}-openai-project`],
   };
 
-  const vertexConfig = {
+  const vertexConfig: Record<string, any> = {
     vertexProjectId: requestHeaders[`x-${POWERED_BY}-vertex-project-id`],
     vertexRegion: requestHeaders[`x-${POWERED_BY}-vertex-region`],
   };
+
+  let vertexServiceAccountJson =
+    requestHeaders[`x-${POWERED_BY}-vertex-service-account-json`];
+  if (vertexServiceAccountJson) {
+    try {
+      vertexConfig.vertexServiceAccountJson = JSON.parse(
+        vertexServiceAccountJson
+      );
+    } catch (e) {
+      vertexConfig.vertexServiceAccountJson = null;
+    }
+  }
 
   if (requestHeaders[`x-${POWERED_BY}-config`]) {
     let parsedConfigJson = JSON.parse(requestHeaders[`x-${POWERED_BY}-config`]);
@@ -1037,10 +1055,18 @@ export function constructConfigFromRequestHeaders(
           ...openAiConfig,
         };
       }
+
+      if (parsedConfigJson.provider === GOOGLE_VERTEX_AI) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...vertexConfig,
+        };
+      }
     }
     return convertKeysToCamelCase(parsedConfigJson, [
       'override_params',
       'params',
+      'vertex_service_account_json',
     ]) as any;
   }
 
